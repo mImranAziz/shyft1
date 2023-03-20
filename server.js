@@ -18,10 +18,9 @@ app.use(cors({
 // Open the SQLite database
 const db = new sqlite3.Database('./students.db');
 
-// GET endpoint to fetch all records from the student table
 app.get('/students', (req, res) => {
     const query = squel.select()
-        .from('student')
+        .from('students')
         .toString();
 
     db.all(query, [], (err, rows) => {
@@ -33,11 +32,10 @@ app.get('/students', (req, res) => {
     });
 });
 
-// Insert a new record into the student table
 app.post('/students', (req, res) => {
     const { first_name, last_name, date_of_birth } = req.body;
     const query = squel.insert()
-        .into('student')
+        .into('students')
         .set('first_name', first_name)
         .set('last_name', last_name)
         .set('date_of_birth', date_of_birth)
@@ -47,9 +45,80 @@ app.post('/students', (req, res) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-
         const studentId = this.lastID;
         res.json({ id: studentId });
+    });
+});
+
+app.get('/courses', (req, res) => {
+    const query = squel.select()
+        .from('courses')
+        .toString();
+
+    db.all(query, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.json(rows);
+    });
+});
+
+app.post('/courses', (req, res) => {
+    const { course } = req.body;
+    const query = squel.insert()
+        .into('courses')
+        .set('course', course)
+        .toString();
+
+    db.run(query, function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        const courseId = this.lastID;
+        res.json({ id: courseId });
+    });
+});
+
+
+app.get('/grades', (req, res) => {
+    const query = squel.select()
+        .field('first_name || " " || last_name', 'student')
+        .field('courses.course')
+        .field('grades.grade')
+        .from('grades')
+        .join('students', null, 'grades.student_id = students.id')
+        .join('courses', null, 'grades.course_id = courses.id')
+        .toString();
+
+    db.all(query, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.json(rows);
+    });
+});
+
+app.post('/grades', (req, res) => {
+    const { grade, student_id, course_id } = req.body;
+    const query = squel.insert()
+        .into('grades')
+        .set('grade', grade)
+        .set('student_id', student_id)
+        .set('course_id', course_id)
+        .toString();
+
+    db.run(query, function (err) {
+        if (err) {
+            if (err.message.includes('UNIQUE constraint failed')) {
+                return res.status(403).json({ error: 'Already exists' });
+            } else {
+                return res.status(500).json({ error: err.message });
+            }
+        }
+        const gradeId = this.lastID;
+        res.json({ id: gradeId });
     });
 });
 
