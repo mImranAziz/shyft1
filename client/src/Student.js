@@ -7,7 +7,6 @@ const Student = () => {
     return (
         <div className="content">
             <AddStudent setUpdatedKey={setUpdatedKey} />
-            <h5>Existing students</h5>
             <StudentGrid key={updatedKey} />
         </div>
     )

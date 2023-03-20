@@ -1,8 +1,8 @@
 import { Outlet, Link } from "react-router-dom";
 const Layout = () => {
     return (
-        <>
-            <h1 className="alert alert-dark align-middle">Welcome to Students App</h1>
+        <div className="card">
+            <h1 className="alert alert-dark">Welcome to Students App</h1>
             <div className="container">
                 <nav className="nav">
                     <ul>
@@ -16,7 +16,7 @@ const Layout = () => {
                 </nav>
                 <Outlet />
             </div>
-        </>
+        </div>
     )
 };
 
